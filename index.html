@@ -262,6 +262,7 @@
     const doc = currentPatient.docs[index];
 
     currentDocName.innerText = doc.title;
+    statusText.innerText = "DEBUG -> type: " + doc.type + " | template: " + doc.template;
     signaturePad.clear();
 
     // Si es PDF → mostrar iframe
