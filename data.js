@@ -20,21 +20,20 @@ const PATIENTS = {
   "DEMO123456": {
     name: "Paciente Demo",
     docs: [
+  // ✅ Documento PDF (solo lectura)
+  {
+    title: "Indicación Check UP",
+    type: "pdf",
+    url: "https://drive.google.com/file/d/1x2hJTXTJJ21BqvlPrcO1fFziQzyfP7U3/preview",
+    signed: false
+  },
 
-      // ✅ 5 DOCUMENTOS PDF (solo lectura + firma)
-      {
-        title: "Indicación Check UP",
-        type: "pdf",
-        url: "https://drive.google.com/file/d/1x2hJTXTJJ21BqvlPrcO1fFziQzyfP7U3/preview",
-        signed: false
-      },
-      // ✅ 6° DOCUMENTO = HISTORIA CLÍNICA (editable dentro del portal)
-      { title: "Aviso de Privacidad", type: "form", template: "aviso_privacidad", signed: false },
-{ title: "Consentimiento Mastografía", type: "form", template: "consentimiento_masto", signed: false },
-{ title: "Consentimiento Recto", type: "form", template: "consentimiento_recto", signed: false },
-{ title: "Historia Clínica Check Up", type: "form", template: "historia_clinica", signed: false }
-    ]
-  }
+  // ✅ Formularios dentro del portal
+  { title: "Aviso de Privacidad", type: "form", template: "aviso_privacidad", signed: false },
+  { title: "Consentimiento Mastografía", type: "form", template: "consentimiento_masto", signed: false },
+  { title: "Consentimiento Recto", type: "form", template: "consentimiento_recto", signed: false },
+  { title: "Historia Clínica Check Up", type: "form", template: "historia_clinica", signed: false }
+]
 
   /***************************************************
    * ✅ AGREGAR MÁS PACIENTES (COPIAS ESTE BLOQUE)
