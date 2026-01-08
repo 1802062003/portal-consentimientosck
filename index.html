@@ -158,6 +158,24 @@
       font-size: 13px;
     }
 
+    .stepNav {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.02);
+      font-size: 12px;
+      color: rgba(230,232,238,0.75);
+    }
+
     @media (max-width: 900px) {
       main { grid-template-columns: 1fr; height: auto; }
       .viewer { height: 78vh; }
@@ -300,10 +318,205 @@
     return `<div class="error">Template no encontrado: ${templateName}</div>`;
   }
 
-  // ✅ AQUÍ van tus 4 renders: Historia, Aviso, Masto, Recto
-  ${'__RENDERS__'}
+  // ✅ 1) AVISO PRIVACIDAD
+  function renderAvisoPrivacidad() {
+    return `
+      <div class="sectionTitle">AVISO DE PRIVACIDAD</div>
+      <div class="muted" style="line-height:1.65;">
+        En términos de lo previsto en la Ley Federal de Protección de Datos Personales en Posesión de los Particulares...
+        (Texto completo aquí, como ya lo tienes)
+      </div>
 
-  // ✅ Guardado local (checkbox support)
+      <div class="sectionTitle">AUTORIZACIÓN</div>
+      <div class="muted" style="font-weight:700; text-align:center; line-height:1.6;">
+        AUTORIZO QUE LOS RESULTADOS DE MIS EXÁMENES MÉDICOS SEAN COMPARTIDOS CON EL GRUPO DE MÉDICOS QUE SE ENCUENTRAN EN MI REVISIÓN.
+      </div>
+
+      <div class="formGrid" style="margin-top:14px;">
+        <div class="field full">
+          <label>Nombre completo del paciente*</label>
+          <input id="ap_nombre" />
+        </div>
+        <div class="field">
+          <label>Fecha*</label>
+          <input id="ap_fecha" type="date" />
+        </div>
+        <div class="field full">
+          <label><input id="ap_chk_acepto" type="checkbox" /> He leído y acepto el Aviso de Privacidad.*</label>
+        </div>
+        <div class="field full">
+          <label><input id="ap_chk_compartir" type="checkbox" /> Autorizo compartir resultados con el grupo médico.*</label>
+        </div>
+      </div>
+      <div class="muted" style="margin-top:12px;">✅ Completa los campos, marca las casillas y luego firma abajo.</div>
+    `;
+  }
+
+  // ✅ 2) MASTOGRAFÍA
+  function renderConsentimientoMasto() {
+    return `
+      <div class="sectionTitle">CHECK UP</div>
+      <div class="sectionTitle">CONSENTIMIENTO INFORMADO PARA ESTUDIO DE MASTOGRAFÍA</div>
+
+      <div class="formGrid">
+        <div class="field"><label>Fecha*</label><input id="masto_fecha" type="date"/></div>
+        <div class="field full"><label>Nombre*</label><input id="masto_nombre"/></div>
+        <div class="field"><label>Fecha de nacimiento*</label><input id="masto_fn" type="date"/></div>
+        <div class="field"><label>Edad*</label><input id="masto_edad" type="number"/></div>
+        <div class="field full"><label>Dirección*</label><input id="masto_dir"/></div>
+        <div class="field"><label>Colonia*</label><input id="masto_colonia"/></div>
+        <div class="field"><label>Teléfono*</label><input id="masto_tel"/></div>
+        <div class="field full"><label>Médico (se llena en clínica)</label><input id="masto_medico" disabled value="(Se llena en clínica)"/></div>
+      </div>
+
+      <div class="sectionTitle">ANTECEDENTES</div>
+      <div class="formGrid">
+        <div class="field">
+          <label>¿Cáncer de mama en familia?*</label>
+          <select id="masto_cancer"><option value="">Selecciona</option><option>Si</option><option>No</option></select>
+        </div>
+        <div class="field"><label>¿Quién?</label><input id="masto_quien"/></div>
+
+        <div class="field"><label>Medicamento*</label>
+          <select id="masto_meds"><option value="">Selecciona</option><option>Si</option><option>No</option></select>
+        </div>
+        <div class="field"><label>Hormonas*</label>
+          <select id="masto_horm"><option value="">Selecciona</option><option>Si</option><option>No</option></select>
+        </div>
+
+        <div class="field full">
+          <label><input id="masto_chk" type="checkbox"/> Confirmo información y autorizo el estudio.*</label>
+        </div>
+      </div>
+
+      <div class="muted" style="margin-top:12px;">✅ Completa y firma abajo.</div>
+    `;
+  }
+
+  // ✅ 3) RECTO
+  function renderConsentimientoRecto() {
+    return `
+      <div class="sectionTitle">CHECK UP</div>
+      <div class="sectionTitle">CONSENTIMIENTO INFORMADO PARA ESTUDIO DE RECTOSIGMOIDOSCOPÍA</div>
+
+      <div class="muted" style="line-height:1.65;">
+        Documento informativo (texto completo, como ya lo tienes)...
+      </div>
+
+      <div class="sectionTitle">DATOS DEL PACIENTE</div>
+      <div class="formGrid">
+        <div class="field"><label>Fecha*</label><input id="recto_fecha" type="date"/></div>
+        <div class="field full"><label>Nombre completo*</label><input id="recto_nombre"/></div>
+        <div class="field"><label>Fecha nacimiento*</label><input id="recto_fn" type="date"/></div>
+        <div class="field"><label>Edad*</label><input id="recto_edad" type="number"/></div>
+        <div class="field"><label>Sexo*</label><input id="recto_sexo"/></div>
+
+        <div class="field full"><label>Médico (se llena en clínica)</label><input id="recto_dr" disabled value="(Se llena en clínica)"/></div>
+
+        <div class="field full">
+          <label><input id="recto_chk" type="checkbox"/> Confirmo consentimiento libre y voluntario.*</label>
+        </div>
+        <div class="field full">
+          <label><input id="recto_chk_alt" type="checkbox"/> Entiendo alternativas y urgencias.*</label>
+        </div>
+      </div>
+
+      <div class="muted" style="margin-top:12px;">✅ Completa y firma abajo.</div>
+    `;
+  }
+
+  // ✅ 4) HISTORIA CLÍNICA (por secciones)
+  let hcStep = 0;
+
+  function renderHistoriaClinica() {
+    return `
+      <div class="sectionTitle">HISTORIA CLÍNICA CHECK UP</div>
+      <div class="pill">Sección ${hcStep + 1} de 5</div>
+      ${renderHCStep(hcStep)}
+      <div class="stepNav">
+        <button class="btn-clear" onclick="prevHC()">Anterior</button>
+        <button class="btn-save" onclick="saveForm()">Guardar sección</button>
+        <button class="btn-sign" onclick="nextHC()">Siguiente</button>
+      </div>
+      <div class="muted" style="margin-top:12px;">
+        ✅ Al terminar todas las secciones, guarda y firma abajo.
+      </div>
+    `;
+  }
+
+  function renderHCStep(step) {
+    if (step === 0) return `
+      <div class="sectionTitle">DATOS GENERALES</div>
+      <div class="formGrid">
+        <div class="field full"><label>Nombre completo*</label><input id="hc_nombre"/></div>
+        <div class="field"><label>Fecha de nacimiento*</label><input id="hc_fn" type="date"/></div>
+        <div class="field"><label>Edad*</label><input id="hc_edad" type="number"/></div>
+        <div class="field"><label>Teléfono*</label><input id="hc_tel"/></div>
+        <div class="field full"><label>Correo*</label><input id="hc_correo" type="email"/></div>
+        <div class="field full"><label>Domicilio*</label><input id="hc_dom"/></div>
+      </div>
+    `;
+
+    if (step === 1) return `
+      <div class="sectionTitle">ANTECEDENTES HEREDO FAMILIARES</div>
+      <div class="formGrid">
+        <div class="field"><label>Cáncer (SI/NO)</label><select id="hf_cancer"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field"><label>¿Quién?</label><input id="hf_cancer_quien"/></div>
+        <div class="field"><label>Diabetes (SI/NO)</label><select id="hf_dm"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field"><label>¿Quién?</label><input id="hf_dm_quien"/></div>
+      </div>
+    `;
+
+    if (step === 2) return `
+      <div class="sectionTitle">EXPLORACIÓN FÍSICA (CLÍNICA)</div>
+      <div class="muted" style="text-align:center;font-weight:700;">*Se llena en clínica*</div>
+      <div class="formGrid">
+        <div class="field"><label>Presión arterial</label><input id="ef_pa"/></div>
+        <div class="field"><label>Frecuencia cardíaca</label><input id="ef_fc"/></div>
+        <div class="field"><label>Peso (kg)</label><input id="ef_peso"/></div>
+        <div class="field"><label>Talla (m)</label><input id="ef_talla"/></div>
+      </div>
+    `;
+
+    if (step === 3) return `
+      <div class="sectionTitle">APARATOS Y SISTEMAS</div>
+      <div class="formGrid">
+        <div class="field"><label>Síntomas generales</label><select id="as_sg"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>Descripción</label><textarea id="as_sg_desc"></textarea></div>
+        <div class="field full"><label>Medicamentos (dosis y desde cuándo)</label><textarea id="as_meds"></textarea></div>
+      </div>
+    `;
+
+    return `
+      <div class="sectionTitle">HOSPITALIZACIONES</div>
+      <div class="formGrid">
+        <div class="field"><label>Hospitalizaciones (SI/NO)</label><select id="hos_si"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>Motivos</label><textarea id="hos_motivos"></textarea></div>
+        <div class="field full"><label>Eventos quirúrgicos</label><textarea id="hos_qx"></textarea></div>
+      </div>
+
+      <div class="sectionTitle">DECLARACIÓN FINAL</div>
+      <div class="field full">
+        <label><input id="hc_declaro" type="checkbox"/> Declaro que la información otorgada es verídica y completa.*</label>
+      </div>
+    `;
+  }
+
+  function nextHC() {
+    saveForm();
+    if (hcStep < 4) hcStep++;
+    docContainer.innerHTML = renderHistoriaClinica();
+    loadSavedForm();
+  }
+
+  function prevHC() {
+    saveForm();
+    if (hcStep > 0) hcStep--;
+    docContainer.innerHTML = renderHistoriaClinica();
+    loadSavedForm();
+  }
+
+  // ✅ Guardado local (incluye checkboxes)
   function getFormData() {
     const inputs = docContainer.querySelectorAll("input, textarea, select");
     const data = {};
@@ -340,68 +553,36 @@
 
   // ✅ Validaciones
   function validateTemplate(template, data) {
-
-    const required = (field, label) => {
-      if (!data[field] || data[field].toString().trim() === "") {
-        return { ok: false, msg: `Falta completar: ${label}` };
-      }
-      return null;
-    };
-
-    const requiredCheck = (field, label) => {
-      if (data[field] !== "on") return { ok: false, msg: `Debes marcar: ${label}` };
-      return null;
-    };
+    const required = (field, label) => (!data[field] || data[field].trim() === "") ? { ok:false, msg:`Falta completar: ${label}` } : null;
+    const requiredCheck = (field, label) => data[field] !== "on" ? { ok:false, msg:`Debes marcar: ${label}` } : null;
 
     if (template === "aviso_privacidad") {
-      return (
-        required("ap_nombre", "Nombre completo") ||
-        required("ap_fecha", "Fecha") ||
-        requiredCheck("ap_chk_acepto", "Aceptación del aviso") ||
-        requiredCheck("ap_chk_compartir", "Autorización de compartir resultados") ||
-        { ok: true }
-      );
+      return required("ap_nombre","Nombre") || required("ap_fecha","Fecha") ||
+        requiredCheck("ap_chk_acepto","Aceptación") || requiredCheck("ap_chk_compartir","Autorización") || { ok:true };
     }
 
     if (template === "consentimiento_masto") {
-      return (
-        required("masto_fecha", "Fecha") ||
-        required("masto_nombre", "Nombre") ||
-        required("masto_fn", "Fecha nacimiento") ||
-        required("masto_edad", "Edad") ||
-        required("masto_dir", "Dirección") ||
-        required("masto_colonia", "Colonia") ||
-        required("masto_tel", "Teléfono") ||
-        required("masto_cancer", "Cáncer de mama (Si/No)") ||
-        required("masto_meds", "Medicamento (Si/No)") ||
-        required("masto_horm", "Hormonas (Si/No)") ||
-        requiredCheck("masto_chk", "Confirmación y autorización") ||
-        { ok: true }
-      );
+      return required("masto_fecha","Fecha") || required("masto_nombre","Nombre") ||
+        required("masto_fn","Nacimiento") || required("masto_edad","Edad") ||
+        required("masto_dir","Dirección") || required("masto_colonia","Colonia") ||
+        required("masto_tel","Teléfono") || required("masto_cancer","Cáncer familiar") ||
+        required("masto_meds","Medicamento") || required("masto_horm","Hormonas") ||
+        requiredCheck("masto_chk","Confirmación") || { ok:true };
     }
 
     if (template === "consentimiento_recto") {
-      return (
-        required("recto_fecha", "Fecha") ||
-        required("recto_nombre", "Nombre") ||
-        required("recto_fn", "Fecha nacimiento") ||
-        required("recto_edad", "Edad") ||
-        required("recto_sexo", "Sexo") ||
-        requiredCheck("recto_chk", "Consentimiento") ||
-        requiredCheck("recto_chk_alt", "Alternativas / urgencias") ||
-        { ok: true }
-      );
+      return required("recto_fecha","Fecha") || required("recto_nombre","Nombre") ||
+        required("recto_fn","Nacimiento") || required("recto_edad","Edad") ||
+        required("recto_sexo","Sexo") || requiredCheck("recto_chk","Consentimiento") ||
+        requiredCheck("recto_chk_alt","Alternativas") || { ok:true };
     }
 
     if (template === "historia_clinica") {
-      return (
-        required("hc_nombre", "Nombre completo") ||
-        required("hc_fn", "Fecha de nacimiento") ||
-        { ok: true }
-      );
+      return required("hc_nombre","Nombre") || required("hc_fn","Nacimiento") ||
+        requiredCheck("hc_declaro","Declaración final") || { ok:true };
     }
 
-    return { ok: true };
+    return { ok:true };
   }
 
   // ✅ Firmar
@@ -419,13 +600,8 @@
 
     if (doc.type === "form") {
       formData = getFormData();
-
       const valid = validateTemplate(doc.template, formData);
-      if (!valid.ok) {
-        statusText.innerText = "⚠️ " + valid.msg;
-        return;
-      }
-
+      if (!valid.ok) { statusText.innerText = "⚠️ " + valid.msg; return; }
       localStorage.setItem("HC_" + token + "_" + doc.template, JSON.stringify(formData));
     }
 
