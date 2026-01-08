@@ -323,13 +323,17 @@ function openDoc(index) {
 
   // --------- TEMPLATES ----------
   function renderTemplate(templateName) {
-    if (templateName === "historia_clinica") return renderHistoriaClinica();
-    if (templateName === "aviso_privacidad") return renderAvisoPrivacidad();
-    if (templateName === "consentimiento_masto") return renderConsentimientoMasto();
-    if (templateName === "consentimiento_recto") return renderConsentimientoRecto();
-    return `<div class="error">Template no encontrado: ${templateName}</div>`;
+  if (!templateName) {
+    return `<div class="error">⚠️ Este documento no tiene template asignado en data.js</div>`;
   }
 
+  if (templateName === "historia_clinica") return renderHistoriaClinica();
+  if (templateName === "aviso_privacidad") return renderAvisoPrivacidad();
+  if (templateName === "consentimiento_masto") return renderConsentimientoMasto();
+  if (templateName === "consentimiento_recto") return renderConsentimientoRecto();
+
+  return `<div class="error">Template no encontrado: ${templateName}</div>`;
+}
   // ✅ 1) AVISO PRIVACIDAD
   function renderAvisoPrivacidad() {
     return `
