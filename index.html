@@ -273,31 +273,44 @@
 
     if (currentPatient.docs[0]) openDoc(0);
   }
+function openDoc(index) {
+  currentDocIndex = index;
+  const doc = currentPatient.docs[index];
 
-  function openDoc(index) {
-    currentDocIndex = index;
-    const doc = currentPatient.docs[index];
+  currentDocName.innerText = doc.title;
+  signaturePad.clear();
 
-    currentDocName.innerText = doc.title;
-    signaturePad.clear();
+  // ✅ PDF
+  if (doc.type === "pdf") {
+    docContainer.innerHTML = `<iframe src="${doc.url}"></iframe>`;
+    statusText.innerText = doc.signed
+      ? "✅ Este documento ya fue firmado."
+      : "✍️ Firma dentro del recuadro y presiona Confirmar firma.";
+    toggleSaveButton(false);
+    return;
+  }
 
-    if (doc.type === "pdf") {
-      docContainer.innerHTML = `<iframe src="${doc.url}"></iframe>`;
-      statusText.innerText = doc.signed ? "✅ Este documento ya fue firmado." : "✍️ Firma y presiona Confirmar firma.";
+  // ✅ FORMULARIOS
+  if (doc.type === "form") {
+    if (!doc.template) {
+      docContainer.innerHTML = `<div class="error">Este documento no tiene template asignado en data.js</div>`;
       toggleSaveButton(false);
       return;
     }
 
-    if (doc.type === "form") {
-      docContainer.innerHTML = renderTemplate(doc.template);
-      statusText.innerText = doc.signed ? "✅ Documento ya firmado." : "📝 Llena el documento, guarda y firma.";
-      toggleSaveButton(true);
-      loadSavedForm();
-      return;
-    }
+    docContainer.innerHTML = renderTemplate(doc.template);
+    statusText.innerText = doc.signed
+      ? "✅ Documento ya firmado."
+      : "📝 Llena el documento, guarda y firma.";
+    toggleSaveButton(true);
+    loadSavedForm();
+    return;
+  }
 
-    docContainer.innerHTML = `<div class="error">Tipo de documento desconocido: ${doc.type}</div>`;
-    toggleSaveButton(false);
+  // ✅ Si no coincide nada:
+  docContainer.innerHTML = `<div class="error">Tipo desconocido: ${doc.type}</div>`;
+  toggleSaveButton(false);
+}
   }
 
   function toggleSaveButton(show) {
