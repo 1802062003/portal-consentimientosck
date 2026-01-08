@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portal de Firmas | Clínica</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+  <script src="./data.js"></script>
+
+  <style>
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { margin: 0; background: #0b0f19; color: #e6e8ee; }
+    header {
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(10px);
+    }
+    header h1 { margin: 0; font-size: 16px; }
+    header .badge {
+      padding: 8px 12px; border-radius: 999px; font-size: 12px;
+      background: rgba(145, 255, 200, 0.10);
+      border: 1px solid rgba(145, 255, 200, 0.25);
+      color: #91ffc8;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+      padding: 18px;
+      height: calc(100vh - 70px);
+    }
+
+    .panel {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      overflow: hidden;
+    }
+
+    .doc-list { padding: 14px; }
+    .doc-list h2 { margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #cfd6e6; }
+    .doc-item {
+      padding: 12px; border-radius: 12px; margin-bottom: 10px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+      transition: all .2s ease;
+      display: flex; justify-content: space-between; gap: 10px; align-items: center;
+    }
+    .doc-item:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.18); }
+    .doc-item .title { font-size: 13px; font-weight: 500; }
+    .doc-item .status {
+      font-size: 11px; padding: 6px 10px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      opacity: 0.9;
+    }
+    .signed { background: rgba(145,255,200,0.10); color: #91ffc8; border-color: rgba(145,255,200,0.28)!important; }
+    .pending { background: rgba(255,210,125,0.10); color: #ffd27d; border-color: rgba(255,210,125,0.28)!important; }
+
+    .viewer { display: grid; grid-template-rows: 1fr auto; height: 100%; }
+    iframe { width: 100%; height: 100%; border: 0; background: #0a0d14; }
+
+    .contentArea { height: 100%; overflow: auto; padding: 18px; }
+
+    .sectionTitle {
+      background: #2f5fb8;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      margin: 18px 0 12px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .formGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .field label {
+      font-size: 12px;
+      color: rgba(230,232,238,0.75);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .field input, .field textarea, .field select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.02);
+      color: #e6e8ee;
+      outline: none;
+      font-size: 13px;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .full { grid-column: 1 / -1; }
+
+    .signature-area {
+      padding: 14px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .signature-area h3 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: #cfd6e6;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    canvas {
+      width: 100%;
+      height: 140px;
+      border-radius: 14px;
+      border: 1px dashed rgba(255,255,255,0.20);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .buttons { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+    button {
+      border: 0; padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all .2s ease;
+    }
+    .btn-clear { background: rgba(255,255,255,0.06); color: #e6e8ee; border: 1px solid rgba(255,255,255,0.10); }
+    .btn-clear:hover { background: rgba(255,255,255,0.10); }
+
+    .btn-save { background: rgba(255,210,125,0.12); color: #ffd27d; border: 1px solid rgba(255,210,125,0.25); }
+    .btn-save:hover { background: rgba(255,210,125,0.18); transform: translateY(-1px); }
+
+    .btn-sign { background: linear-gradient(90deg, #5b7cfa, #8e5bfa); color: white; }
+    .btn-sign:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .muted { color: rgba(230,232,238,0.65); font-size: 12px; }
+    .error {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,80,80,0.12);
+      border: 1px solid rgba(255,80,80,0.25);
+      color: #ffb4b4;
+      margin: 14px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; height: auto; }
+      .viewer { height: 78vh; }
+      .formGrid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <h1>Portal de Firmas — Clínica Privada</h1>
+  <div class="badge" id="patientBadge">Cargando paciente…</div>
+</header>
+
+<main>
+  <div class="panel doc-list">
+    <h2>Documentos</h2>
+    <div id="docs"></div>
+    <p class="muted">Selecciona un documento para visualizarlo y firmarlo.</p>
+  </div>
+
+  <div class="panel viewer">
+    <!-- Aquí se carga PDF o Formulario -->
+    <div id="docContainer" class="contentArea"></div>
+
+    <div class="signature-area">
+      <h3>Firma del paciente <span class="muted" id="currentDocName">—</span></h3>
+
+      <canvas id="signaturePad"></canvas>
+
+      <div class="buttons">
+        <button class="btn-clear" onclick="clearSignature()">Borrar firma</button>
+        <button class="btn-save" onclick="saveForm()">Guardar Historia Clínica</button>
+        <button class="btn-sign" onclick="signDocument()">Confirmar firma</button>
+      </div>
+
+      <div class="muted" id="statusText">Selecciona un documento antes de firmar.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get("t");
+
+  const docsContainer = document.getElementById("docs");
+  const docContainer = document.getElementById("docContainer");
+  const patientBadge = document.getElementById("patientBadge");
+  const currentDocName = document.getElementById("currentDocName");
+  const statusText = document.getElementById("statusText");
+
+  let currentDocIndex = null;
+  let currentPatient = null;
+
+  const canvas = document.getElementById("signaturePad");
+  const signaturePad = new SignaturePad(canvas);
+
+  function resizeCanvas() {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+    signaturePad.clear();
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function showError(msg) {
+    document.body.innerHTML = `<div class="error">${msg}</div>`;
+  }
+
+  if (!token) {
+    showError("⚠️ Link inválido. Falta el token del paciente.");
+  } else {
+    currentPatient = PATIENTS[token];
+    if (!currentPatient) showError("⚠️ Token no encontrado. Este link no existe o ya fue desactivado.");
+    else {
+      patientBadge.innerText = `Paciente: ${currentPatient.name}`;
+      renderDocs();
+    }
+  }
+
+  function renderDocs() {
+    docsContainer.innerHTML = "";
+    currentPatient.docs.forEach((doc, index) => {
+      const item = document.createElement("div");
+      item.className = "doc-item";
+      item.onclick = () => openDoc(index);
+
+      const status = doc.signed ? "Firmado" : "Pendiente";
+      const statusClass = doc.signed ? "status signed" : "status pending";
+
+      item.innerHTML = `<div class="title">${doc.title}</div><div class="${statusClass}">${status}</div>`;
+      docsContainer.appendChild(item);
+    });
+
+    if (currentPatient.docs[0]) openDoc(0);
+  }
+
+  function openDoc(index) {
+    currentDocIndex = index;
+    const doc = currentPatient.docs[index];
+
+    currentDocName.innerText = doc.title;
+    signaturePad.clear();
+
+    // Si es PDF → mostrar iframe
+    if (doc.type === "pdf") {
+      docContainer.innerHTML = `<iframe src="${doc.url}"></iframe>`;
+      statusText.innerText = doc.signed ? "✅ Este documento ya fue firmado." : "✍️ Firma dentro del recuadro y presiona Confirmar firma.";
+      toggleSaveButton(false);
+    }
+
+    // Si es Historia Clínica → mostrar formulario
+    if (doc.type === "form") {
+      docContainer.innerHTML = renderHistoriaClinica();
+      statusText.innerText = doc.signed ? "✅ Historia clínica ya fue firmada." : "📝 Llena la historia clínica, guarda y firma.";
+      toggleSaveButton(true);
+      loadSavedForm();
+    }
+  }
+
+  function toggleSaveButton(show) {
+    document.querySelector(".btn-save").style.display = show ? "inline-block" : "none";
+  }
+
+  function clearSignature() {
+    signaturePad.clear();
+  }
+
+  // -----------------------------
+  // HISTORIA CLÍNICA (editable)
+  // -----------------------------
+  function renderHistoriaClinica() {
+    return `
+      <div class="sectionTitle">HISTORIA CLÍNICA CHECK UP</div>
+      <p class="muted" style="text-align:center;font-weight:700;">*FAVOR DE LEER Y LLENAR DETENIDAMENTE*</p>
+
+      <div class="formGrid">
+        <div class="field full"><label>Nombre completo*</label><input id="hc_nombre" /></div>
+        <div class="field"><label>Fecha de nacimiento*</label><input id="hc_fn" type="date"/></div>
+        <div class="field"><label>Edad*</label><input id="hc_edad" type="number"/></div>
+        <div class="field"><label>Género*</label>
+          <select id="hc_genero">
+            <option value="">Selecciona</option>
+            <option>Masculino</option>
+            <option>Femenino</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="field"><label>Estado civil*</label><input id="hc_ec" /></div>
+        <div class="field"><label>Lugar de nacimiento*</label><input id="hc_ln" /></div>
+        <div class="field full"><label>Domicilio*</label><input id="hc_dom" /></div>
+        <div class="field"><label>Teléfono*</label><input id="hc_tel" /></div>
+        <div class="field"><label>Correo*</label><input id="hc_correo" type="email"/></div>
+        <div class="field full"><label>Contacto de emergencia*</label><input id="hc_emerg" /></div>
+        <div class="field"><label>Grado escolaridad*</label><input id="hc_escolar" /></div>
+        <div class="field full"><label>Nombre de la empresa o lugar donde trabaja actualmente</label><input id="hc_empresa" /></div>
+        <div class="field full"><label>Puesto o cargo en su lugar de trabajo</label><input id="hc_puesto" /></div>
+      </div>
+
+      <div class="sectionTitle">ANTECEDENTES HEREDO FAMILIARES</div>
+
+      <div class="formGrid">
+        <div class="field"><label>Cáncer (SI/NO)</label>
+          <select id="hf_cancer"><option value="">Selecciona</option><option>SI</option><option>NO</option></select>
+        </div>
+        <div class="field"><label>¿Quién?</label><input id="hf_cancer_quien"/></div>
+
+        <div class="field"><label>Diabetes Mellitus (SI/NO)</label>
+          <select id="hf_dm"><option value="">Selecciona</option><option>SI</option><option>NO</option></select>
+        </div>
+        <div class="field"><label>¿Quién?</label><input id="hf_dm_quien"/></div>
+
+        <div class="field"><label>Hipertensión (SI/NO)</label>
+          <select id="hf_hta"><option value="">Selecciona</option><option>SI</option><option>NO</option></select>
+        </div>
+        <div class="field"><label>¿Quién?</label><input id="hf_hta_quien"/></div>
+
+        <div class="field"><label>Enfermedades autoinmunes (SI/NO)</label>
+          <select id="hf_auto"><option value="">Selecciona</option><option>SI</option><option>NO</option></select>
+        </div>
+        <div class="field"><label>¿Quién?</label><input id="hf_auto_quien"/></div>
+
+        <div class="field"><label>Infarto < 50 años (SI/NO)</label>
+          <select id="hf_infarto"><option value="">Selecciona</option><option>SI</option><option>NO</option></select>
+        </div>
+        <div class="field"><label>¿Quién?</label><input id="hf_infarto_quien"/></div>
+
+        <div class="field"><label>Otras enfermedades (SI/NO)</label>
+          <select id="hf_otras"><option value="">Selecciona</option><option>SI</option><option>NO</option></select>
+        </div>
+        <div class="field"><label>¿Quién?</label><input id="hf_otras_quien"/></div>
+      </div>
+
+      <div class="sectionTitle">EXPLORACIÓN FÍSICA</div>
+      <p class="muted" style="text-align:center;font-weight:700;">*SE LLENA EL DÍA DE SU CHECK UP POR NUESTRO PERSONAL*</p>
+
+      <div class="formGrid">
+        <div class="field"><label>Presión arterial</label><input id="ef_pa"/></div>
+        <div class="field"><label>Frecuencia cardíaca</label><input id="ef_fc"/></div>
+        <div class="field"><label>Frecuencia respiratoria</label><input id="ef_fr"/></div>
+        <div class="field"><label>Talla (m)</label><input id="ef_talla"/></div>
+        <div class="field"><label>Peso (kg)</label><input id="ef_peso"/></div>
+        <div class="field"><label>IMC</label><input id="ef_imc"/></div>
+        <div class="field"><label>Saturación O2</label><input id="ef_o2"/></div>
+        <div class="field"><label>Temperatura</label><input id="ef_temp"/></div>
+      </div>
+
+      <div class="sectionTitle">ANTECEDENTES GINECO OBSTÉTRICOS (solo mujeres)</div>
+      <div class="formGrid">
+        <div class="field"><label>Primera menstruación (edad)</label><input id="go_pm"/></div>
+        <div class="field"><label>Fecha última menstruación</label><input id="go_fum" type="date"/></div>
+        <div class="field full"><label>Frecuencia de periodos menstruales</label><input id="go_freq"/></div>
+        <div class="field"><label>Duración del periodo por días</label><input id="go_duracion"/></div>
+
+        <div class="field"><label>Embarazos</label><input id="go_emb"/></div>
+        <div class="field"><label>Partos</label><input id="go_partos"/></div>
+        <div class="field"><label>Cesáreas</label><input id="go_cesareas"/></div>
+        <div class="field"><label>Abortos</label><input id="go_abortos"/></div>
+
+        <div class="field"><label>Último parto (fecha)</label><input id="go_ult_parto" type="date"/></div>
+        <div class="field"><label>Última cesárea (fecha)</label><input id="go_ult_ces" type="date"/></div>
+        <div class="field"><label>Último aborto (fecha)</label><input id="go_ult_ab" type="date"/></div>
+
+        <div class="field full"><label>Complicaciones en parto o cesárea</label><input id="go_comp"/></div>
+
+        <div class="field"><label>Uso anticonceptivos</label>
+          <select id="go_anticon"><option value="">Selecciona</option><option>SI</option><option>NO</option></select>
+        </div>
+        <div class="field"><label>Tiempo de uso</label><input id="go_tiempo"/></div>
+
+        <div class="field full"><label>Enfermedades transmisión sexual</label><input id="go_ets"/></div>
+        <div class="field full"><label>Autoexploración de mamas (frecuencia)</label><input id="go_mamas"/></div>
+        <div class="field full"><label>Último papanicolaou (fecha y resultado)</label><input id="go_pap"/></div>
+
+        <div class="field"><label>Ultrasonido mamario (fecha)</label><input id="go_us_mam"/></div>
+        <div class="field"><label>Mastografía (fecha)</label><input id="go_masto"/></div>
+        <div class="field"><label>Ninguno</label>
+          <select id="go_none"><option value="">Selecciona</option><option>SI</option><option>NO</option></select>
+        </div>
+      </div>
+
+      <div class="sectionTitle">APARATOS Y SISTEMAS</div>
+      <div class="formGrid">
+        <div class="field"><label>Síntomas generales (SI/NO)</label><select id="as_sg"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_sg_desc"></textarea></div>
+
+        <div class="field"><label>Órganos de los sentidos (SI/NO)</label><select id="as_os"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_os_desc"></textarea></div>
+
+        <div class="field"><label>Neuropsiquiátrico (SI/NO)</label><select id="as_np"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_np_desc"></textarea></div>
+
+        <div class="field"><label>Respiratorio (SI/NO)</label><select id="as_resp"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_resp_desc"></textarea></div>
+
+        <div class="field"><label>Piel y faneras (SI/NO)</label><select id="as_piel"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_piel_desc"></textarea></div>
+
+        <div class="field"><label>Músculo esquelético (SI/NO)</label><select id="as_me"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_me_desc"></textarea></div>
+
+        <div class="field"><label>Hematopoyético (SI/NO)</label><select id="as_hema"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_hema_desc"></textarea></div>
+
+        <div class="field"><label>Contagio por COVID/Influenza</label><select id="as_covid"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field"><label>¿Cuándo?</label><input id="as_covid_cuando"/></div>
+        <div class="field full"><label>Secuelas percibidas</label><textarea id="as_covid_secuelas"></textarea></div>
+
+        <div class="field full"><label>Si toma medicamentos, indique cuáles, dosis y desde cuándo</label><textarea id="as_meds"></textarea></div>
+
+        <div class="field"><label>Gastrointestinal (SI/NO)</label><select id="as_gi"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_gi_desc"></textarea></div>
+
+        <div class="field"><label>Cardiovascular (SI/NO)</label><select id="as_cardio"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_cardio_desc"></textarea></div>
+
+        <div class="field"><label>Urinario y genital (SI/NO)</label><select id="as_ug"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>¿Cuáles? / Describir ampliamente</label><textarea id="as_ug_desc"></textarea></div>
+      </div>
+
+      <div class="sectionTitle">ANTECEDENTES PERSONALES PATOLÓGICOS</div>
+      <div class="formGrid">
+        <div class="field"><label>Alergias (SI/NO)</label><select id="app_alergias"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field"><label>Tipo de alergia</label><input id="app_tipo_alergia"/></div>
+
+        <div class="field full"><label>Alcohol: frecuencia (días/semana)</label><input id="app_alcohol_freq"/></div>
+        <div class="field full"><label>Tipo de alcohol</label><input id="app_alcohol_tipo"/></div>
+        <div class="field"><label>Cantidad por día</label><input id="app_alcohol_cant"/></div>
+        <div class="field"><label>Edad de inicio</label><input id="app_alcohol_inicio"/></div>
+        <div class="field"><label>Edad de término (si suspendió)</label><input id="app_alcohol_fin"/></div>
+
+        <div class="field full"><label>Tabaco: frecuencia (días/semana)</label><input id="app_tabaco_freq"/></div>
+        <div class="field full"><label>Cantidad cigarrillos por día</label><input id="app_tabaco_cant"/></div>
+        <div class="field"><label>Edad de inicio</label><input id="app_tabaco_inicio"/></div>
+        <div class="field"><label>Edad de término (si suspendió)</label><input id="app_tabaco_fin"/></div>
+
+        <div class="field full"><label>Traumatismos (fracturas, cráneo, columna, etc.)</label><textarea id="app_trauma"></textarea></div>
+      </div>
+
+      <div class="sectionTitle">ANTECEDENTES PERSONALES NO PATOLÓGICOS</div>
+      <div class="formGrid">
+        <div class="field"><label>Frecuencia de baño a la semana</label><input id="apnp_bano"/></div>
+        <div class="field"><label>Frecuencia aseo dental al día</label><input id="apnp_dental"/></div>
+
+        <div class="field full"><label>Alimentación (anote cuántas veces/semana)</label><textarea id="apnp_alimentacion"></textarea></div>
+
+        <div class="field"><label>Actividad física (días/semana)</label><input id="apnp_af_dias"/></div>
+        <div class="field"><label>Tipo de ejercicio</label><input id="apnp_af_tipo"/></div>
+        <div class="field"><label>Duración por día (hrs)</label><input id="apnp_af_dur"/></div>
+
+        <div class="field full"><label>Vacunación (aplicadas año presente y anterior)</label><textarea id="apnp_vac"></textarea></div>
+
+        <div class="field"><label>Mascota (Perro/Gato/Otro)</label><input id="apnp_mascota"/></div>
+        <div class="field"><label>Cantidad</label><input id="apnp_mascota_cant"/></div>
+
+        <div class="field"><label>Viajes recientes (fecha)</label><input id="apnp_viajes_fecha" type="date"/></div>
+        <div class="field"><label>Región geográfica</label><input id="apnp_viajes_region"/></div>
+      </div>
+
+      <div class="sectionTitle">HOSPITALIZACIONES</div>
+      <div class="formGrid">
+        <div class="field"><label>Hospitalizaciones (SI/NO)</label><select id="hos_si"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field"><label>Duración en días</label><input id="hos_dias"/></div>
+        <div class="field full"><label>Motivos</label><textarea id="hos_motivos"></textarea></div>
+
+        <div class="field"><label>Grupo sanguíneo</label><input id="hos_grupo"/></div>
+        <div class="field"><label>Transfusiones (SI/NO)</label><select id="hos_trans"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
+        <div class="field full"><label>Cantidad</label><input id="hos_cant"/></div>
+
+        <div class="field full"><label>Eventos quirúrgicos (anotar cirugías y año)</label><textarea id="hos_qx"></textarea></div>
+
+        <div class="field full"><label>Enfermedades diagnosticadas previamente (anote nombre, año y tratamiento)</label><textarea id="hos_enf"></textarea></div>
+
+        <div class="field full"><label>Describir síntomas actuales cercanos al check up</label><textarea id="hos_sintomas"></textarea></div>
+      </div>
+
+      <div class="sectionTitle">DECLARACIÓN FINAL</div>
+      <p class="muted" style="text-align:center;font-weight:700;">
+        “POR MEDIO DE LA PRESENTE DECLARO QUE LA INFORMACIÓN OTORGADA EN ESTA HISTORIA CLÍNICA ES VERÍDICA Y COMPLETA…”
+      </p>
+
+      <div class="muted" style="margin-top:14px;">
+        ✅ Al terminar, presiona “Guardar Historia Clínica” y luego firma abajo.
+      </div>
+    `;
+  }
+
+  // Guardado local (para no perder datos si se sale)
+  function getFormData() {
+    const inputs = docContainer.querySelectorAll("input, textarea, select");
+    const data = {};
+    inputs.forEach(i => data[i.id] = i.value);
+    return data;
+  }
+
+  function loadSavedForm() {
+    const saved = localStorage.getItem("HC_" + token);
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    Object.keys(data).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = data[id];
+    });
+  }
+
+  function saveForm() {
+    if (currentDocIndex === null) return;
+    const doc = currentPatient.docs[currentDocIndex];
+    if (doc.type !== "form") return;
+
+    const data = getFormData();
+    localStorage.setItem("HC_" + token, JSON.stringify(data));
+    statusText.innerText = "✅ Historia clínica guardada (local). Ahora firma y confirma.";
+  }
+
+  // -----------------------------
+  // FIRMAR DOCUMENTO
+  // -----------------------------
+  async function signDocument() {
+    if (currentDocIndex === null) return;
+
+    const doc = currentPatient.docs[currentDocIndex];
+
+    if (signaturePad.isEmpty()) {
+      statusText.innerText = "⚠️ La firma está vacía. Firma antes de confirmar.";
+      return;
+    }
+
+    // Si es historia clínica → debe estar guardada
+    let formData = null;
+    if (doc.type === "form") {
+      formData = getFormData();
+      localStorage.setItem("HC_" + token, JSON.stringify(formData));
+    }
+
+    const signature = signaturePad.toDataURL();
+
+    // Guardado remoto (Apps Script)
+    try {
+      await fetch(BACKEND_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          token,
+          patientName: currentPatient.name,
+          docTitle: doc.title,
+          docType: doc.type,
+          formData,
+          signature,
+          timestamp: new Date().toISOString()
+        }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" }
+      });
+
+      currentPatient.docs[currentDocIndex].signed = true;
+      statusText.innerText = "✅ Firma registrada y enviada.";
+      renderDocs();
+
+    } catch (err) {
+      console.error(err);
+      statusText.innerText = "⚠️ Error al guardar. Revisa BACKEND_URL y permisos.";
+    }
+  }
+</script>
+</body>
+</html>
