@@ -30,19 +30,19 @@ const PATIENTS = {
       },
       {
         title: "Aviso de Privacidad",
-        type: "pdf",
+        type: "form",
         url: "https://drive.google.com/file/d/1POJFEHlrIxZjDBT86IbJ6YinJ27LCGyo/preview",
         signed: false
       },
       {
         title: "Consentimiento Mastografía",
-        type: "pdf",
+        type: "form",
         url: "https://drive.google.com/file/d/1hzEa-WHZL3fhoYROyIPXSNLBGP60wKkZ/preview",
         signed: false
       },
       {
         title: "Consentimiento Recto",
-        type: "pdf",
+        type: "form",
         url: "https://drive.google.com/file/d/19g_z0rSgQaB9y05KsQWda9B-bf-Du0uu/preview",
         signed: false
       },
