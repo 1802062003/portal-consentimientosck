@@ -3,51 +3,51 @@
  * Aquí registras:
  * 1) El BACKEND_URL de Apps Script (para guardar firma)
  * 2) Los pacientes (tokens únicos)
- * 3) Los 6 documentos (5 PDFs + 1 Historia Clínica editable)
+ * 3) Los documentos (PDF o formularios dentro del portal)
  ***************************************************/
 
-// ✅ PASO A: pega aquí la URL de tu Apps Script (cuando lo creemos)
+// ✅ URL de tu Apps Script Web App
 const BACKEND_URL = "https://script.google.com/macros/s/AKfycbygICnYmnRo91EG_RWAdE8ZfzNe2FviFOj9YWcyH4_jfDcpHlhWcnFNAPQk8wo5uAghRQ/exec";
 
-// ✅ PASO B: aquí registras pacientes
-// Cada paciente tiene un TOKEN (único)
-// Su link será:
-// https://TUUSUARIO.github.io/portal-consentimientos/?t=TOKEN
-
+// ✅ Registro de pacientes (tokens únicos)
 const PATIENTS = {
 
   // ✅ EJEMPLO DE PACIENTE (DEMO)
   "DEMO123456": {
     name: "Paciente Demo",
     docs: [
-  // ✅ Documento PDF (solo lectura)
-  {
-    title: "Indicación Check UP",
-    type: "pdf",
-    url: "https://drive.google.com/file/d/1x2hJTXTJJ21BqvlPrcO1fFziQzyfP7U3/preview",
-    signed: false
-  },
 
-  // ✅ Formularios dentro del portal
-  { title: "Aviso de Privacidad", type: "form", template: "aviso_privacidad", signed: false },
-  { title: "Consentimiento Mastografía", type: "form", template: "consentimiento_masto", signed: false },
-  { title: "Consentimiento Recto", type: "form", template: "consentimiento_recto", signed: false },
-  { title: "Historia Clínica Check Up", type: "form", template: "historia_clinica", signed: false }
-]
+      // ✅ Documento PDF (solo lectura)
+      {
+        title: "Indicación Check UP",
+        type: "pdf",
+        url: "https://drive.google.com/file/d/1x2hJTXTJJ21BqvlPrcO1fFziQzyfP7U3/preview",
+        signed: false
+      },
+
+      // ✅ Formularios dentro del portal
+      { title: "Aviso de Privacidad", type: "form", template: "aviso_privacidad", signed: false },
+      { title: "Consentimiento Mastografía", type: "form", template: "consentimiento_masto", signed: false },
+      { title: "Consentimiento Recto", type: "form", template: "consentimiento_recto", signed: false },
+      { title: "Historia Clínica Check Up", type: "form", template: "historia_clinica", signed: false }
+    ]
+  }
 
   /***************************************************
-   * ✅ AGREGAR MÁS PACIENTES (COPIAS ESTE BLOQUE)
+   * ✅ PARA AGREGAR MÁS PACIENTES:
+   * Copia el bloque de abajo y pégalo después del DEMO
    ***************************************************
-  
+
+  ,
+
   "TOKEN123ABC": {
     name: "Juan Pérez",
     docs: [
-      { title: "Consentimiento General", type:"pdf", url:"https://drive.google.com/file/d/ID_PDF1/preview", signed:false },
-      { title: "Aviso de Privacidad", type:"pdf", url:"https://drive.google.com/file/d/ID_PDF2/preview", signed:false },
-      { title: "Consentimiento Anestesia", type:"pdf", url:"https://drive.google.com/file/d/ID_PDF3/preview", signed:false },
-      { title: "Consentimiento Cirugía", type:"pdf", url:"https://drive.google.com/file/d/ID_PDF4/preview", signed:false },
-      { title: "Alta Voluntaria", type:"pdf", url:"https://drive.google.com/file/d/ID_PDF5/preview", signed:false },
-      { title: "Historia Clínica Check Up", type:"form", signed:false }
+      { title: "Indicación Check UP", type: "pdf", url: "https://drive.google.com/file/d/ID/preview", signed: false },
+      { title: "Aviso de Privacidad", type: "form", template: "aviso_privacidad", signed: false },
+      { title: "Consentimiento Mastografía", type: "form", template: "consentimiento_masto", signed: false },
+      { title: "Consentimiento Recto", type: "form", template: "consentimiento_recto", signed: false },
+      { title: "Historia Clínica Check Up", type: "form", template: "historia_clinica", signed: false }
     ]
   }
 
