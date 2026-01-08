@@ -265,18 +265,18 @@
     signaturePad.clear();
 
     // Si es PDF → mostrar iframe
-    if (doc.type === "pdf") {
+    if (doc.type === "form") {
       docContainer.innerHTML = `<iframe src="${doc.url}"></iframe>`;
       statusText.innerText = doc.signed ? "✅ Este documento ya fue firmado." : "✍️ Firma dentro del recuadro y presiona Confirmar firma.";
       toggleSaveButton(false);
     }
 
     // Si es Historia Clínica → mostrar formulario
-    if (doc.type === "form") {
-      docContainer.innerHTML = renderHistoriaClinica();
-      statusText.innerText = doc.signed ? "✅ Historia clínica ya fue firmada." : "📝 Llena la historia clínica, guarda y firma.";
-      toggleSaveButton(true);
-      loadSavedForm();
+ if (doc.type === "form") {
+  docContainer.innerHTML = renderTemplate(doc.template);
+  statusText.innerText = doc.signed ? "✅ Documento ya firmado." : "📝 Llena el documento, guarda y firma.";
+  toggleSaveButton(true);
+  loadSavedForm();
     }
   }
 
@@ -506,6 +506,197 @@
       </div>
     `;
   }
+  function renderTemplate(templateName) {
+  if (templateName === "historia_clinica") return renderHistoriaClinica();
+  if (templateName === "aviso_privacidad") return renderAvisoPrivacidad();
+  if (templateName === "consentimiento_masto") return renderConsentimientoMasto();
+  if (templateName === "consentimiento_recto") return renderConsentimientoRecto();
+
+  return `<div class="error">Template no encontrado: ${templateName}</div>`;
+  }
+  function renderAvisoPrivacidad() {
+  return `
+    <div class="sectionTitle">AVISO DE PRIVACIDAD</div>
+
+    <div class="muted" style="line-height:1.6;">
+      En términos de lo previsto en la Ley Federal de Protección de Datos Personales en Posesión de los Particulares
+      (en lo sucesivo denominada como “La Ley”), le pedimos que lea cuidadosamente los Términos y Condiciones contenidos
+      en este Aviso de Privacidad, ya que la simple aportación que haga de sus datos Personales mediante su envío a
+      OPERADORA Y ADMINISTRADORA DE HOSPITALES SAN JOSE S.A DE C.V., ya sea a través de nuestra página de internet; y/o
+      al correo electrónico, constituye la aceptación de estos Términos y Condiciones y en consecuencia nos autoriza
+      expresamente al tratamiento de sus datos personales:
+    </div>
+
+    <div class="sectionTitle">TÉRMINOS Y CONDICIONES</div>
+    <div class="muted" style="line-height:1.65;">
+      <b>1.</b> El presente Aviso tiene por objeto la protección de sus datos personales...<br><br>
+      <b>2.</b> Conforme al Artículo 3, fracción V, de la Ley...<br><br>
+      <b>3.</b> Operadora y Administradora de Hospitales San José S.A de C.V...<br><br>
+      <b>4.</b> Mantener informados a sus clientes...<br><br>
+      <b>5.</b> La temporalidad del manejo de sus Datos Personales será indefinida...<br><br>
+      <b>6.</b> Se compromete a guardar estricta confidencialidad...<br><br>
+      <b>7.</b> Derechos ARCO: acceso, rectificación, cancelación y oposición...<br><br>
+      <b>8.</b> Le sugerimos conocer y analizar la Ley...
+    </div>
+
+    <div class="sectionTitle">AUTORIZACIÓN</div>
+    <div class="muted" style="font-weight:700; text-align:center; line-height:1.6;">
+      AUTORIZO QUE LOS RESULTADOS DE MIS EXÁMENES MÉDICOS SEAN COMPARTIDOS CON EL GRUPO DE MÉDICOS QUE SE ENCUENTRAN EN MI REVISIÓN.
+    </div>
+
+    <div class="formGrid" style="margin-top:14px;">
+      <div class="field full">
+        <label>Nombre completo del paciente*</label>
+        <input id="ap_nombre" />
+      </div>
+
+      <div class="field">
+        <label>Fecha (Día/Mes/Año)*</label>
+        <input id="ap_fecha" type="date" />
+      </div>
+
+      <div class="field full">
+        <label>
+          <input id="ap_chk_acepto" type="checkbox" />
+          He leído y acepto el Aviso de Privacidad y autorizo el tratamiento de mis datos personales.*
+        </label>
+      </div>
+
+      <div class="field full">
+        <label>
+          <input id="ap_chk_compartir" type="checkbox" />
+          Autorizo que mis resultados sean compartidos con el grupo de médicos en mi revisión.*
+        </label>
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:10px;">
+      ✅ Completa los campos, marca las casillas y luego firma en la sección inferior.
+    </div>
+  `;
+}
+  function renderConsentimientoMasto() {
+  return `
+    <div class="sectionTitle">CHECK UP</div>
+    <div class="sectionTitle">CONSENTIMIENTO INFORMADO PARA ESTUDIO DE MASTOGRAFÍA</div>
+
+    <div class="formGrid">
+      <div class="field"><label>Fecha*</label><input id="masto_fecha" type="date"/></div>
+      <div class="field full"><label>Nombre*</label><input id="masto_nombre"/></div>
+      <div class="field"><label>Fecha de nacimiento*</label><input id="masto_fn" type="date"/></div>
+      <div class="field"><label>Edad*</label><input id="masto_edad" type="number"/></div>
+      <div class="field full"><label>Dirección*</label><input id="masto_dir"/></div>
+      <div class="field"><label>Colonia*</label><input id="masto_colonia"/></div>
+      <div class="field"><label>Teléfono*</label><input id="masto_tel"/></div>
+      <div class="field full"><label>Médico (se llena en clínica)</label><input id="masto_medico" disabled value="(Se llena en clínica)"/></div>
+    </div>
+
+    <div class="sectionTitle">ANTECEDENTES FAMILIARES PERSONALES</div>
+    <div class="formGrid">
+      <div class="field">
+        <label>¿Alguien de su familia ha padecido cáncer de mama?*</label>
+        <select id="masto_cancer">
+          <option value="">Selecciona</option><option>Si</option><option>No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>¿Quién?</label>
+        <input id="masto_quien"/>
+      </div>
+
+      <div class="field"><label>Fecha de su primera menstruación</label><input id="masto_pm" type="date"/></div>
+      <div class="field"><label>Fecha de su última menstruación</label><input id="masto_um" type="date"/></div>
+
+      <div class="field"><label>¿Cuántos días dura?</label><input id="masto_dias"/></div>
+      <div class="field"><label>¿Sus periodos son regulares?</label><input id="masto_regulares"/></div>
+
+      <div class="field">
+        <label>¿Toma algún medicamento?*</label>
+        <select id="masto_meds"><option value="">Selecciona</option><option>Si</option><option>No</option></select>
+      </div>
+      <div class="field full"><label>¿Cuál?</label><input id="masto_meds_cual"/></div>
+      <div class="field"><label>Dosis</label><input id="masto_meds_dosis"/></div>
+      <div class="field full"><label>¿Cuánto tiempo?</label><input id="masto_meds_tiempo"/></div>
+
+      <div class="field">
+        <label>Hormonas*</label>
+        <select id="masto_horm"><option value="">Selecciona</option><option>Si</option><option>No</option></select>
+      </div>
+      <div class="field full"><label>¿Cuál?</label><input id="masto_horm_cual"/></div>
+      <div class="field"><label>Dosis</label><input id="masto_horm_dosis"/></div>
+      <div class="field full"><label>¿Cuánto tiempo?</label><input id="masto_horm_tiempo"/></div>
+
+      <div class="field"><label>Número de embarazos</label><input id="masto_emb"/></div>
+      <div class="field"><label>Número de hijos</label><input id="masto_hijos"/></div>
+      <div class="field full"><label>Edades</label><input id="masto_edades"/></div>
+      <div class="field full"><label>¿Amamantó a sus hijos?</label><input id="masto_amamanto"/></div>
+
+      <div class="field full">
+        <label>
+          <input id="masto_chk" type="checkbox"/>
+          Confirmo que la información proporcionada es verdadera y autorizo el estudio.*
+        </label>
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:10px;">
+      ✅ Completa los campos obligatorios, marca la casilla y luego firma en la sección inferior.
+    </div>
+  `;
+}
+  function renderConsentimientoRecto() {
+  return `
+    <div class="sectionTitle">CHECK UP</div>
+    <div class="sectionTitle">CONSENTIMIENTO INFORMADO PARA ESTUDIO DE RECTOSIGMOIDOSCOPÍA</div>
+
+    <div class="muted" style="line-height:1.65;">
+      Este documento sirve para que usted, o quién represente, dé su consentimiento para la realización del estudio de Rectosigmoidoscopía.
+      Usted puede elegir no aceptar el procedimiento... Antes de firmar es importante que lea despacio la siguiente información.
+    </div>
+
+    <div class="sectionTitle">EN QUÉ CONSISTE Y PARA QUÉ SIRVE</div>
+    <div class="muted" style="line-height:1.65;">
+      Previa dilatación y lubricación anal, se realiza una exploración visual con un aparato flexible de fibra óptica...
+    </div>
+
+    <div class="sectionTitle">RIESGOS DEL PROCEDIMIENTO</div>
+    <div class="muted" style="line-height:1.65;">
+      Puede presentarse con poca frecuencia algunos riesgos comunes derivados de todo procedimiento como: perforación, hemorragia...
+    </div>
+
+    <div class="sectionTitle">DATOS DEL PACIENTE</div>
+    <div class="formGrid">
+      <div class="field"><label>Fecha*</label><input id="recto_fecha" type="date"/></div>
+      <div class="field full"><label>Nombre completo*</label><input id="recto_nombre"/></div>
+      <div class="field"><label>Fecha de nacimiento*</label><input id="recto_fn" type="date"/></div>
+      <div class="field"><label>Edad*</label><input id="recto_edad" type="number"/></div>
+      <div class="field"><label>Sexo*</label><input id="recto_sexo"/></div>
+
+      <div class="field full">
+        <label>Médico (se llena en clínica)</label>
+        <input id="recto_dr" disabled value="(Se llena en clínica)" />
+      </div>
+
+      <div class="field full">
+        <label>
+          <input id="recto_chk" type="checkbox"/>
+          Confirmo que he leído la información, se aclararon mis dudas y otorgo mi consentimiento de manera libre y voluntaria.*
+        </label>
+      </div>
+
+      <div class="field full">
+        <label>
+          <input id="recto_chk_alt" type="checkbox"/>
+          Entiendo que existen alternativas y que el médico podrá actuar ante contingencias y urgencias.*
+        </label>
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:10px;">
+      ✅ Completa los campos obligatorios, marca las casillas y luego firma en la sección inferior.
+    </div>
+  `;
+}
 
   // Guardado local (para no perder datos si se sale)
   function getFormData() {
@@ -516,7 +707,8 @@
   }
 
   function loadSavedForm() {
-    const saved = localStorage.getItem("HC_" + token);
+    const doc = currentPatient.docs[currentDocIndex];
+const saved = localStorage.getItem("HC_" + token + "_" + doc.template);
     if (!saved) return;
     const data = JSON.parse(saved);
     Object.keys(data).forEach(id => {
@@ -531,7 +723,7 @@
     if (doc.type !== "form") return;
 
     const data = getFormData();
-    localStorage.setItem("HC_" + token, JSON.stringify(data));
+   localStorage.setItem("HC_" + token + "_" + doc.template, JSON.stringify(data));
     statusText.innerText = "✅ Historia clínica guardada (local). Ahora firma y confirma.";
   }
 
@@ -551,10 +743,15 @@
     // Si es historia clínica → debe estar guardada
     let formData = null;
     if (doc.type === "form") {
-      formData = getFormData();
-      localStorage.setItem("HC_" + token, JSON.stringify(formData));
-    }
+  formData = getFormData();
 
+  const valid = validateTemplate(doc.template, formData);
+  if (!valid.ok) {
+    statusText.innerText = "⚠️ " + valid.msg;
+    return;
+  }
+  localStorage.setItem("HC_" + token + "_" + doc.template, JSON.stringify(formData));
+}
     const signature = signaturePad.toDataURL();
 
     // Guardado remoto (Apps Script)
