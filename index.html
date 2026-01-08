@@ -265,7 +265,7 @@
     signaturePad.clear();
 
     // Si es PDF → mostrar iframe
-    if (doc.type === "form") {
+    if (doc.type === "pdf") {
       docContainer.innerHTML = `<iframe src="${doc.url}"></iframe>`;
       statusText.innerText = doc.signed ? "✅ Este documento ya fue firmado." : "✍️ Firma dentro del recuadro y presiona Confirmar firma.";
       toggleSaveButton(false);
