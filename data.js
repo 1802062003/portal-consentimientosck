@@ -33,7 +33,7 @@ const PATIENTS = {
         title: "Historia Clínica Check Up",
         type: "form",
         signed: false
-      }
+      },
       { title: "Aviso de Privacidad", type: "form", template: "aviso_privacidad", signed: false },
 { title: "Consentimiento Mastografía", type: "form", template: "consentimiento_masto", signed: false },
 { title: "Consentimiento Recto", type: "form", template: "consentimiento_recto", signed: false },
