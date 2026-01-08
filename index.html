@@ -241,7 +241,7 @@
   }
 
   function renderDocs() {
-    docsContainer.innerHTML = "";
+    docsContainer.innerHTML = renderTemplate(doc.template || "historia_clinica");;
     currentPatient.docs.forEach((doc, index) => {
       const item = document.createElement("div");
       item.className = "doc-item";
