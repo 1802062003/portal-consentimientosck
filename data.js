@@ -8,7 +8,7 @@ const BACKEND_URL = "https://script.google.com/macros/s/AKfycbygICnYmnRo91EG_RWA
 // ================================
 const PATIENTS = {
   "DEMO123456": {
-    name: "Paciente Demo",
+    name: "Paciente Eric Guillermo",
     docs: [
       {
         title: "Indicación Check UP",
