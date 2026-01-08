@@ -9,8 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
 
- <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-<script src="data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+  <script src="data.js"></script>
+
   <style>
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
     body { margin: 0; background: #0b0f19; color: #e6e8ee; }
@@ -28,7 +29,6 @@
       border: 1px solid rgba(145, 255, 200, 0.25);
       color: #91ffc8;
     }
-
     main {
       display: grid;
       grid-template-columns: 320px 1fr;
@@ -36,14 +36,12 @@
       padding: 18px;
       height: calc(100vh - 70px);
     }
-
     .panel {
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 16px;
       background: rgba(255,255,255,0.03);
       overflow: hidden;
     }
-
     .doc-list { padding: 14px; }
     .doc-list h2 { margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #cfd6e6; }
     .doc-item {
@@ -66,7 +64,6 @@
 
     .viewer { display: grid; grid-template-rows: 1fr auto; height: 100%; }
     iframe { width: 100%; height: 100%; border: 0; background: #0a0d14; }
-
     .contentArea { height: 100%; overflow: auto; padding: 18px; }
 
     .sectionTitle {
@@ -78,7 +75,6 @@
       text-align: center;
       letter-spacing: 0.5px;
     }
-
     .formGrid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -110,16 +106,6 @@
       flex-direction: column;
       gap: 12px;
     }
-
-    .signature-area h3 {
-      margin: 0;
-      font-size: 13px;
-      font-weight: 700;
-      color: #cfd6e6;
-      display: flex;
-      justify-content: space-between;
-    }
-
     canvas {
       width: 100%;
       height: 140px;
@@ -127,7 +113,6 @@
       border: 1px dashed rgba(255,255,255,0.20);
       background: rgba(255,255,255,0.02);
     }
-
     .buttons { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
     button {
       border: 0; padding: 10px 14px;
@@ -138,13 +123,8 @@
       transition: all .2s ease;
     }
     .btn-clear { background: rgba(255,255,255,0.06); color: #e6e8ee; border: 1px solid rgba(255,255,255,0.10); }
-    .btn-clear:hover { background: rgba(255,255,255,0.10); }
-
     .btn-save { background: rgba(255,210,125,0.12); color: #ffd27d; border: 1px solid rgba(255,210,125,0.25); }
-    .btn-save:hover { background: rgba(255,210,125,0.18); transform: translateY(-1px); }
-
     .btn-sign { background: linear-gradient(90deg, #5b7cfa, #8e5bfa); color: white; }
-    .btn-sign:hover { opacity: 0.9; transform: translateY(-1px); }
 
     .muted { color: rgba(230,232,238,0.65); font-size: 12px; }
     .error {
@@ -155,24 +135,6 @@
       color: #ffb4b4;
       margin: 14px;
       font-size: 13px;
-    }
-
-    .stepNav {
-      margin-top: 14px;
-      display: flex;
-      gap: 10px;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.02);
-      font-size: 12px;
-      color: rgba(230,232,238,0.75);
     }
 
     @media (max-width: 900px) {
@@ -200,7 +162,7 @@
     <div id="docContainer" class="contentArea"></div>
 
     <div class="signature-area">
-      <h3>Firma del paciente <span class="muted" id="currentDocName">—</span></h3>
+      <div class="muted" id="currentDocName">—</div>
 
       <canvas id="signaturePad"></canvas>
 
@@ -216,6 +178,8 @@
 </main>
 
 <script>
+(function() {
+
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get("t");
 
@@ -247,18 +211,21 @@
 
   if (!token) {
     showError("⚠️ Link inválido. Falta el token del paciente.");
-  } else {
-    currentPatient = PATIENTS[token];
-    if (!currentPatient) showError("⚠️ Token no encontrado. Este link no existe o ya fue desactivado.");
-    else {
-      patientBadge.innerText = `Paciente: ${currentPatient.name}`;
-      renderDocs();
-    }
+    return;
   }
+
+  currentPatient = PATIENTS[token];
+  if (!currentPatient) {
+    showError("⚠️ Token no encontrado o desactivado.");
+    return;
+  }
+
+  patientBadge.innerText = `Paciente: ${currentPatient.name}`;
+  renderDocs();
+  openDoc(0);
 
   function renderDocs() {
     docsContainer.innerHTML = "";
-
     currentPatient.docs.forEach((doc, index) => {
       const item = document.createElement("div");
       item.className = "doc-item";
@@ -266,273 +233,113 @@
 
       const status = doc.signed ? "Firmado" : "Pendiente";
       const statusClass = doc.signed ? "status signed" : "status pending";
-
       item.innerHTML = `<div class="title">${doc.title}</div><div class="${statusClass}">${status}</div>`;
       docsContainer.appendChild(item);
     });
-
-   // if (currentPatient.docs[0]) openDoc(0);
-  }
-function openDoc(index) {
-  currentDocIndex = index;
-  const doc = currentPatient.docs[index];
-
-  currentDocName.innerText = doc.title;
-  signaturePad.clear();
-
-  // ✅ PDF
-  if (doc.type === "pdf") {
-    docContainer.innerHTML = `<iframe src="${doc.url}"></iframe>`;
-    statusText.innerText = doc.signed
-      ? "✅ Este documento ya fue firmado."
-      : "✍️ Firma dentro del recuadro y presiona Confirmar firma.";
-    toggleSaveButton(false);
-    return;
   }
 
-  // ✅ FORMULARIOS
-  if (doc.type === "form") {
-    if (!doc.template) {
-      docContainer.innerHTML = `<div class="error">Este documento no tiene template asignado en data.js</div>`;
-      toggleSaveButton(false);
+  function openDoc(index) {
+    currentDocIndex = index;
+    const doc = currentPatient.docs[index];
+    currentDocName.innerText = doc.title;
+    signaturePad.clear();
+
+    if (doc.type === "pdf") {
+      docContainer.innerHTML = `<iframe src="${doc.url}"></iframe>`;
+      statusText.innerText = doc.signed ? "✅ Ya firmado." : "✍️ Firma y confirma.";
+      toggleSave(false);
       return;
     }
 
-    docContainer.innerHTML = renderTemplate(doc.template || "historia_clinica");
-    statusText.innerText = doc.signed
-      ? "✅ Documento ya firmado."
-      : "📝 Llena el documento, guarda y firma.";
-    toggleSaveButton(true);
-    loadSavedForm();
-    return;
+    if (doc.type === "form") {
+      docContainer.innerHTML = renderTemplate(doc.template);
+      statusText.innerText = doc.signed ? "✅ Ya firmado." : "📝 Llena, guarda y firma.";
+      toggleSave(true);
+      loadSavedForm();
+      return;
+    }
+
+    docContainer.innerHTML = `<div class="error">Tipo desconocido: ${doc.type}</div>`;
   }
 
-  // ✅ Si no coincide nada:
-  docContainer.innerHTML = `<div class="error">Tipo desconocido: ${doc.type}</div>`;
-  toggleSaveButton(false);
-}
-  }
-
-  function toggleSaveButton(show) {
+  function toggleSave(show) {
     document.querySelector(".btn-save").style.display = show ? "inline-block" : "none";
   }
 
-  function clearSignature() {
-    signaturePad.clear();
+  window.clearSignature = () => signaturePad.clear();
+
+  // ====== Templates
+  function renderTemplate(name) {
+    if (name === "aviso_privacidad") return renderAviso();
+    if (name === "consentimiento_masto") return renderMasto();
+    if (name === "consentimiento_recto") return renderRecto();
+    if (name === "historia_clinica") return renderHC();
+    return `<div class="error">Template no encontrado: ${name}</div>`;
   }
 
-  // --------- TEMPLATES ----------
-  function renderTemplate(templateName) {
-  if (!templateName) {
-    return `<div class="error">⚠️ Este documento no tiene template asignado en data.js</div>`;
-  }
-
-  if (templateName === "historia_clinica") return renderHistoriaClinica();
-  if (templateName === "aviso_privacidad") return renderAvisoPrivacidad();
-  if (templateName === "consentimiento_masto") return renderConsentimientoMasto();
-  if (templateName === "consentimiento_recto") return renderConsentimientoRecto();
-
-  return `<div class="error">Template no encontrado: ${templateName}</div>`;
-}
-  // ✅ 1) AVISO PRIVACIDAD
-  function renderAvisoPrivacidad() {
+  function renderAviso() {
     return `
       <div class="sectionTitle">AVISO DE PRIVACIDAD</div>
-      <div class="muted" style="line-height:1.65;">
+      <div class="muted" style="line-height:1.6;">
         En términos de lo previsto en la Ley Federal de Protección de Datos Personales en Posesión de los Particulares...
-        (Texto completo aquí, como ya lo tienes)
-      </div>
-
-      <div class="sectionTitle">AUTORIZACIÓN</div>
-      <div class="muted" style="font-weight:700; text-align:center; line-height:1.6;">
-        AUTORIZO QUE LOS RESULTADOS DE MIS EXÁMENES MÉDICOS SEAN COMPARTIDOS CON EL GRUPO DE MÉDICOS QUE SE ENCUENTRAN EN MI REVISIÓN.
-      </div>
-
-      <div class="formGrid" style="margin-top:14px;">
-        <div class="field full">
-          <label>Nombre completo del paciente*</label>
-          <input id="ap_nombre" />
-        </div>
-        <div class="field">
-          <label>Fecha*</label>
-          <input id="ap_fecha" type="date" />
-        </div>
-        <div class="field full">
-          <label><input id="ap_chk_acepto" type="checkbox" /> He leído y acepto el Aviso de Privacidad.*</label>
-        </div>
-        <div class="field full">
-          <label><input id="ap_chk_compartir" type="checkbox" /> Autorizo compartir resultados con el grupo médico.*</label>
-        </div>
-      </div>
-      <div class="muted" style="margin-top:12px;">✅ Completa los campos, marca las casillas y luego firma abajo.</div>
-    `;
-  }
-
-  // ✅ 2) MASTOGRAFÍA
-  function renderConsentimientoMasto() {
-    return `
-      <div class="sectionTitle">CHECK UP</div>
-      <div class="sectionTitle">CONSENTIMIENTO INFORMADO PARA ESTUDIO DE MASTOGRAFÍA</div>
-
-      <div class="formGrid">
-        <div class="field"><label>Fecha*</label><input id="masto_fecha" type="date"/></div>
-        <div class="field full"><label>Nombre*</label><input id="masto_nombre"/></div>
-        <div class="field"><label>Fecha de nacimiento*</label><input id="masto_fn" type="date"/></div>
-        <div class="field"><label>Edad*</label><input id="masto_edad" type="number"/></div>
-        <div class="field full"><label>Dirección*</label><input id="masto_dir"/></div>
-        <div class="field"><label>Colonia*</label><input id="masto_colonia"/></div>
-        <div class="field"><label>Teléfono*</label><input id="masto_tel"/></div>
-        <div class="field full"><label>Médico (se llena en clínica)</label><input id="masto_medico" disabled value="(Se llena en clínica)"/></div>
-      </div>
-
-      <div class="sectionTitle">ANTECEDENTES</div>
-      <div class="formGrid">
-        <div class="field">
-          <label>¿Cáncer de mama en familia?*</label>
-          <select id="masto_cancer"><option value="">Selecciona</option><option>Si</option><option>No</option></select>
-        </div>
-        <div class="field"><label>¿Quién?</label><input id="masto_quien"/></div>
-
-        <div class="field"><label>Medicamento*</label>
-          <select id="masto_meds"><option value="">Selecciona</option><option>Si</option><option>No</option></select>
-        </div>
-        <div class="field"><label>Hormonas*</label>
-          <select id="masto_horm"><option value="">Selecciona</option><option>Si</option><option>No</option></select>
-        </div>
-
-        <div class="field full">
-          <label><input id="masto_chk" type="checkbox"/> Confirmo información y autorizo el estudio.*</label>
-        </div>
-      </div>
-
-      <div class="muted" style="margin-top:12px;">✅ Completa y firma abajo.</div>
-    `;
-  }
-
-  // ✅ 3) RECTO
-  function renderConsentimientoRecto() {
-    return `
-      <div class="sectionTitle">CHECK UP</div>
-      <div class="sectionTitle">CONSENTIMIENTO INFORMADO PARA ESTUDIO DE RECTOSIGMOIDOSCOPÍA</div>
-
-      <div class="muted" style="line-height:1.65;">
-        Documento informativo (texto completo, como ya lo tienes)...
       </div>
 
       <div class="sectionTitle">DATOS DEL PACIENTE</div>
       <div class="formGrid">
+        <div class="field full"><label>Nombre completo*</label><input id="ap_nombre" /></div>
+        <div class="field"><label>Fecha*</label><input id="ap_fecha" type="date"/></div>
+        <div class="field full"><label><input id="ap_chk_acepto" type="checkbox"/> He leído y acepto el Aviso de Privacidad*</label></div>
+        <div class="field full"><label><input id="ap_chk_compartir" type="checkbox"/> Autorizo compartir resultados*</label></div>
+      </div>
+    `;
+  }
+
+  function renderMasto() {
+    return `
+      <div class="sectionTitle">CONSENTIMIENTO MASTOGRAFÍA</div>
+      <div class="formGrid">
+        <div class="field"><label>Fecha*</label><input id="masto_fecha" type="date"/></div>
+        <div class="field full"><label>Nombre*</label><input id="masto_nombre"/></div>
+        <div class="field"><label>Fecha nacimiento*</label><input id="masto_fn" type="date"/></div>
+        <div class="field"><label>Edad*</label><input id="masto_edad" type="number"/></div>
+        <div class="field full"><label>Dirección*</label><input id="masto_dir"/></div>
+        <div class="field"><label>Colonia*</label><input id="masto_colonia"/></div>
+        <div class="field"><label>Teléfono*</label><input id="masto_tel"/></div>
+        <div class="field full"><label><input id="masto_chk" type="checkbox"/> Confirmo información y autorizo el estudio*</label></div>
+      </div>
+    `;
+  }
+
+  function renderRecto() {
+    return `
+      <div class="sectionTitle">CONSENTIMIENTO RECTOSIGMOIDOSCOPÍA</div>
+      <div class="formGrid">
         <div class="field"><label>Fecha*</label><input id="recto_fecha" type="date"/></div>
         <div class="field full"><label>Nombre completo*</label><input id="recto_nombre"/></div>
-        <div class="field"><label>Fecha nacimiento*</label><input id="recto_fn" type="date"/></div>
+        <div class="field"><label>Nacimiento*</label><input id="recto_fn" type="date"/></div>
         <div class="field"><label>Edad*</label><input id="recto_edad" type="number"/></div>
         <div class="field"><label>Sexo*</label><input id="recto_sexo"/></div>
-
-        <div class="field full"><label>Médico (se llena en clínica)</label><input id="recto_dr" disabled value="(Se llena en clínica)"/></div>
-
-        <div class="field full">
-          <label><input id="recto_chk" type="checkbox"/> Confirmo consentimiento libre y voluntario.*</label>
-        </div>
-        <div class="field full">
-          <label><input id="recto_chk_alt" type="checkbox"/> Entiendo alternativas y urgencias.*</label>
-        </div>
+        <div class="field full"><label><input id="recto_chk" type="checkbox"/> Confirmo consentimiento*</label></div>
+        <div class="field full"><label><input id="recto_chk_alt" type="checkbox"/> Entiendo alternativas y urgencias*</label></div>
       </div>
-
-      <div class="muted" style="margin-top:12px;">✅ Completa y firma abajo.</div>
     `;
   }
 
-  // ✅ 4) HISTORIA CLÍNICA (por secciones)
-  let hcStep = 0;
-
-  function renderHistoriaClinica() {
+  function renderHC() {
     return `
       <div class="sectionTitle">HISTORIA CLÍNICA CHECK UP</div>
-      <div class="pill">Sección ${hcStep + 1} de 5</div>
-      ${renderHCStep(hcStep)}
-      <div class="stepNav">
-        <button class="btn-clear" onclick="prevHC()">Anterior</button>
-        <button class="btn-save" onclick="saveForm()">Guardar sección</button>
-        <button class="btn-sign" onclick="nextHC()">Siguiente</button>
-      </div>
-      <div class="muted" style="margin-top:12px;">
-        ✅ Al terminar todas las secciones, guarda y firma abajo.
-      </div>
-    `;
-  }
-
-  function renderHCStep(step) {
-    if (step === 0) return `
-      <div class="sectionTitle">DATOS GENERALES</div>
       <div class="formGrid">
         <div class="field full"><label>Nombre completo*</label><input id="hc_nombre"/></div>
-        <div class="field"><label>Fecha de nacimiento*</label><input id="hc_fn" type="date"/></div>
+        <div class="field"><label>Fecha nacimiento*</label><input id="hc_fn" type="date"/></div>
         <div class="field"><label>Edad*</label><input id="hc_edad" type="number"/></div>
-        <div class="field"><label>Teléfono*</label><input id="hc_tel"/></div>
-        <div class="field full"><label>Correo*</label><input id="hc_correo" type="email"/></div>
         <div class="field full"><label>Domicilio*</label><input id="hc_dom"/></div>
-      </div>
-    `;
-
-    if (step === 1) return `
-      <div class="sectionTitle">ANTECEDENTES HEREDO FAMILIARES</div>
-      <div class="formGrid">
-        <div class="field"><label>Cáncer (SI/NO)</label><select id="hf_cancer"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
-        <div class="field"><label>¿Quién?</label><input id="hf_cancer_quien"/></div>
-        <div class="field"><label>Diabetes (SI/NO)</label><select id="hf_dm"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
-        <div class="field"><label>¿Quién?</label><input id="hf_dm_quien"/></div>
-      </div>
-    `;
-
-    if (step === 2) return `
-      <div class="sectionTitle">EXPLORACIÓN FÍSICA (CLÍNICA)</div>
-      <div class="muted" style="text-align:center;font-weight:700;">*Se llena en clínica*</div>
-      <div class="formGrid">
-        <div class="field"><label>Presión arterial</label><input id="ef_pa"/></div>
-        <div class="field"><label>Frecuencia cardíaca</label><input id="ef_fc"/></div>
-        <div class="field"><label>Peso (kg)</label><input id="ef_peso"/></div>
-        <div class="field"><label>Talla (m)</label><input id="ef_talla"/></div>
-      </div>
-    `;
-
-    if (step === 3) return `
-      <div class="sectionTitle">APARATOS Y SISTEMAS</div>
-      <div class="formGrid">
-        <div class="field"><label>Síntomas generales</label><select id="as_sg"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
-        <div class="field full"><label>Descripción</label><textarea id="as_sg_desc"></textarea></div>
-        <div class="field full"><label>Medicamentos (dosis y desde cuándo)</label><textarea id="as_meds"></textarea></div>
-      </div>
-    `;
-
-    return `
-      <div class="sectionTitle">HOSPITALIZACIONES</div>
-      <div class="formGrid">
-        <div class="field"><label>Hospitalizaciones (SI/NO)</label><select id="hos_si"><option value="">Selecciona</option><option>SI</option><option>NO</option></select></div>
-        <div class="field full"><label>Motivos</label><textarea id="hos_motivos"></textarea></div>
-        <div class="field full"><label>Eventos quirúrgicos</label><textarea id="hos_qx"></textarea></div>
-      </div>
-
-      <div class="sectionTitle">DECLARACIÓN FINAL</div>
-      <div class="field full">
-        <label><input id="hc_declaro" type="checkbox"/> Declaro que la información otorgada es verídica y completa.*</label>
+        <div class="field"><label>Teléfono*</label><input id="hc_tel"/></div>
+        <div class="field full"><label><input id="hc_declaro" type="checkbox"/> Declaro que la información es verídica*</label></div>
       </div>
     `;
   }
 
-  function nextHC() {
-    saveForm();
-    if (hcStep < 4) hcStep++;
-    docContainer.innerHTML = renderHistoriaClinica();
-    loadSavedForm();
-  }
-
-  function prevHC() {
-    saveForm();
-    if (hcStep > 0) hcStep--;
-    docContainer.innerHTML = renderHistoriaClinica();
-    loadSavedForm();
-  }
-
-  // ✅ Guardado local (incluye checkboxes)
+  // ===== Guardado local
   function getFormData() {
     const inputs = docContainer.querySelectorAll("input, textarea, select");
     const data = {};
@@ -546,7 +353,7 @@ function openDoc(index) {
 
   function loadSavedForm() {
     const doc = currentPatient.docs[currentDocIndex];
-    const saved = localStorage.getItem("HC_" + token + "_" + doc.template);
+    const saved = localStorage.getItem("FORM_" + token + "_" + doc.template);
     if (!saved) return;
     const data = JSON.parse(saved);
     Object.keys(data).forEach(id => {
@@ -557,58 +364,45 @@ function openDoc(index) {
     });
   }
 
-  function saveForm() {
+  window.saveForm = () => {
     if (currentDocIndex === null) return;
     const doc = currentPatient.docs[currentDocIndex];
     if (doc.type !== "form") return;
+    localStorage.setItem("FORM_" + token + "_" + doc.template, JSON.stringify(getFormData()));
+    statusText.innerText = "✅ Guardado local.";
+  };
 
-    const data = getFormData();
-    localStorage.setItem("HC_" + token + "_" + doc.template, JSON.stringify(data));
-    statusText.innerText = "✅ Documento guardado (local). Ahora firma y confirma.";
+  // ===== Validación mínima
+  function validate(doc, data) {
+    const required = (id, msg) => (!data[id] || data[id].trim() === "") ? msg : null;
+    const check = (id, msg) => data[id] !== "on" ? msg : null;
+
+    if (doc.template === "aviso_privacidad") {
+      return required("ap_nombre","Falta Nombre") || required("ap_fecha","Falta Fecha")
+        || check("ap_chk_acepto","Debes aceptar Aviso") || check("ap_chk_compartir","Debes autorizar compartir");
+    }
+    if (doc.template === "consentimiento_masto") {
+      return required("masto_fecha","Falta Fecha") || required("masto_nombre","Falta Nombre")
+        || check("masto_chk","Debes confirmar autorización");
+    }
+    if (doc.template === "consentimiento_recto") {
+      return required("recto_fecha","Falta Fecha") || required("recto_nombre","Falta Nombre")
+        || check("recto_chk","Falta consentimiento") || check("recto_chk_alt","Falta alternativas");
+    }
+    if (doc.template === "historia_clinica") {
+      return required("hc_nombre","Falta Nombre") || required("hc_fn","Falta Nacimiento")
+        || check("hc_declaro","Debes aceptar declaración final");
+    }
+    return null;
   }
 
-  // ✅ Validaciones
-  function validateTemplate(template, data) {
-    const required = (field, label) => (!data[field] || data[field].trim() === "") ? { ok:false, msg:`Falta completar: ${label}` } : null;
-    const requiredCheck = (field, label) => data[field] !== "on" ? { ok:false, msg:`Debes marcar: ${label}` } : null;
-
-    if (template === "aviso_privacidad") {
-      return required("ap_nombre","Nombre") || required("ap_fecha","Fecha") ||
-        requiredCheck("ap_chk_acepto","Aceptación") || requiredCheck("ap_chk_compartir","Autorización") || { ok:true };
-    }
-
-    if (template === "consentimiento_masto") {
-      return required("masto_fecha","Fecha") || required("masto_nombre","Nombre") ||
-        required("masto_fn","Nacimiento") || required("masto_edad","Edad") ||
-        required("masto_dir","Dirección") || required("masto_colonia","Colonia") ||
-        required("masto_tel","Teléfono") || required("masto_cancer","Cáncer familiar") ||
-        required("masto_meds","Medicamento") || required("masto_horm","Hormonas") ||
-        requiredCheck("masto_chk","Confirmación") || { ok:true };
-    }
-
-    if (template === "consentimiento_recto") {
-      return required("recto_fecha","Fecha") || required("recto_nombre","Nombre") ||
-        required("recto_fn","Nacimiento") || required("recto_edad","Edad") ||
-        required("recto_sexo","Sexo") || requiredCheck("recto_chk","Consentimiento") ||
-        requiredCheck("recto_chk_alt","Alternativas") || { ok:true };
-    }
-
-    if (template === "historia_clinica") {
-      return required("hc_nombre","Nombre") || required("hc_fn","Nacimiento") ||
-        requiredCheck("hc_declaro","Declaración final") || { ok:true };
-    }
-
-    return { ok:true };
-  }
-
-  // ✅ Firmar
-  async function signDocument() {
+  // ===== Firmar + enviar
+  window.signDocument = async () => {
     if (currentDocIndex === null) return;
-
     const doc = currentPatient.docs[currentDocIndex];
 
     if (signaturePad.isEmpty()) {
-      statusText.innerText = "⚠️ La firma está vacía. Firma antes de confirmar.";
+      statusText.innerText = "⚠️ Firma vacía.";
       return;
     }
 
@@ -616,37 +410,37 @@ function openDoc(index) {
 
     if (doc.type === "form") {
       formData = getFormData();
-      const valid = validateTemplate(doc.template, formData);
-      if (!valid.ok) { statusText.innerText = "⚠️ " + valid.msg; return; }
-      localStorage.setItem("HC_" + token + "_" + doc.template, JSON.stringify(formData));
+      const err = validate(doc, formData);
+      if (err) { statusText.innerText = "⚠️ " + err; return; }
+      localStorage.setItem("FORM_" + token + "_" + doc.template, JSON.stringify(formData));
     }
-
-    const signature = signaturePad.toDataURL();
 
     try {
       await fetch(BACKEND_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
           token,
           patientName: currentPatient.name,
           docTitle: doc.title,
           docType: doc.type,
           formData,
-          signature,
+          signature: signaturePad.toDataURL(),
           timestamp: new Date().toISOString()
-        }),
-        headers: { "Content-Type": "text/plain;charset=utf-8" }
+        })
       });
 
-      currentPatient.docs[currentDocIndex].signed = true;
-      statusText.innerText = "✅ Firma registrada y enviada.";
+      doc.signed = true;
+      statusText.innerText = "✅ Firma guardada.";
       renderDocs();
 
-    } catch (err) {
-      console.error(err);
-      statusText.innerText = "⚠️ Error al guardar. Revisa BACKEND_URL y permisos.";
+    } catch (e) {
+      statusText.innerText = "⚠️ Error guardando. Revisa backend.";
+      console.error(e);
     }
-  }
+  };
+
+})();
 </script>
 
 </body>
