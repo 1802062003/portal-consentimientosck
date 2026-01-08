@@ -271,7 +271,7 @@
       docsContainer.appendChild(item);
     });
 
-    if (currentPatient.docs[0]) openDoc(0);
+   // if (currentPatient.docs[0]) openDoc(0);
   }
 function openDoc(index) {
   currentDocIndex = index;
@@ -298,7 +298,7 @@ function openDoc(index) {
       return;
     }
 
-    docContainer.innerHTML = renderTemplate(doc.template);
+    docContainer.innerHTML = renderTemplate(doc.template || "historia_clinica");
     statusText.innerText = doc.signed
       ? "✅ Documento ya firmado."
       : "📝 Llena el documento, guarda y firma.";
